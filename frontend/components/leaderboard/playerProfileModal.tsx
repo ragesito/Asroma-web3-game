@@ -11,6 +11,7 @@ import Toast from "@/components/toast";
 import { useEffect } from "react";
 import { Button } from "@/components/statefulButton";
 import { useTranslation } from "react-i18next";
+import { resolveAvatarUrl } from "@/app/lib/avatar";
 interface PlayerProfileProps {
   player: any;
   onClose: () => void;
@@ -43,7 +44,7 @@ export default function PlayerProfileModal({ player, onClose }: PlayerProfilePro
     const res = await api.post(
       "/friends/request",
       {
-        recipient: player.username,   // 👈 IGUAL QUE FriendList
+        recipient: player.username,   
       },
       {
         headers: {
@@ -100,10 +101,10 @@ export default function PlayerProfileModal({ player, onClose }: PlayerProfilePro
           className="bg-black/80 border border-white/20 rounded-2xl p-8 w-[380px] text-white text-center shadow-xl"
         >
           <img
-            src={`http://localhost:5000${player.avatar}`}
+            src={resolveAvatarUrl(player.avatar)}
             width={100}
             height={100}
-            className="rounded-full mx-auto border border-white/30"
+            className="rounded-full mx-auto border border-white/30 object-cover"
             alt="avatar"
           />
 

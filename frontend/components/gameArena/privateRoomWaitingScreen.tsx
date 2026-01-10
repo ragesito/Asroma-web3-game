@@ -2,6 +2,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { useTranslation } from "react-i18next";
+import { resolveAvatarUrl } from "@/app/lib/avatar";
 interface PrivateRoomWaitingProps {
   roomId: string;
   user: any;
@@ -41,10 +42,10 @@ export default function PrivateRoomWaitingScreen({
         >
           
           <img
-            src={`http://localhost:5000${user.avatar}`}
+            src={resolveAvatarUrl(user.avatar)}
             width={120}
             height={120}
-            className="rounded-full border-4 border-yellow-300"
+            className="rounded-full border-4 border-yellow-300 object-cover"
             alt="you"
           />
           <p className="mt-2 text-lg sm:text-xl font-semibold">{user.username}</p>

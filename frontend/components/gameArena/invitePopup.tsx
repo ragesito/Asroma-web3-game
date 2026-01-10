@@ -1,7 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-
+import { resolveAvatarUrl } from "@/app/lib/avatar";
 interface InvitePopupProps {
   open: boolean;
   onClose: () => void;
@@ -31,10 +31,11 @@ export default function InvitePopup({
         </h3>
 
         <div className="flex flex-col items-center gap-3">
-          <img
-            src={`http://localhost:5000${fromAvatar}`}
-            className="w-20 h-20 object-cover rounded-full border border-white/30"
-          />
+          
+        <img
+          src={resolveAvatarUrl(fromAvatar)}
+          className="w-20 h-20 object-cover rounded-full border border-white/30"
+        />
           <p ><span className="text-orange-700 font-semibold">{fromUsername}</span> {t("wants_to_join_game")}</p>
         </div>
 

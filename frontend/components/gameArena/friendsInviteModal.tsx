@@ -4,6 +4,7 @@ import { useUserStore } from "@/app/store/userStore";
 import { socket } from "@/app/lib/socket";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
+import { resolveAvatarUrl } from "@/app/lib/avatar";
 interface FriendsInviteModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -56,9 +57,9 @@ export default function FriendsInviteModal({
               >
                 <div className="flex items-center gap-3">
                   <img
-                    src={`http://localhost:5000${friend.avatar}`}
-                    className="w-10 h-10 rounded-full border border-white/20"
-                  />
+                      src={resolveAvatarUrl(friend.avatar)}
+                      className="w-10 h-10 rounded-full border border-white/20 object-cover"
+                    />
                   <p>{friend.username}</p>
                 </div>
 

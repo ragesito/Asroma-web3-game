@@ -2,6 +2,7 @@
 
 import { MotionTransition } from "../transition-component";
 import { useTranslation } from "react-i18next";
+import { resolveAvatarUrl } from "@/app/lib/avatar";
 export default function GlobalFriendRequestPopup({
   fromUsername,
   fromAvatar,
@@ -30,7 +31,7 @@ export default function GlobalFriendRequestPopup({
       >
         {/* Avatar */}
         <img
-          src={`http://localhost:5000${fromAvatar}`}
+          src={resolveAvatarUrl(fromAvatar)}
           className="w-8 h-8 rounded-full object-cover border border-white/20"
         />
 

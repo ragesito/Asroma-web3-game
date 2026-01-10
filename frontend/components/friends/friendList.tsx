@@ -13,6 +13,7 @@ import LottieLoader from "../lottieLoader";
 import { Button } from "@/components/statefulButton";
 import { motion } from "framer-motion";
 import { useNotificationStore } from "@/app/store/notificationStore";
+import { resolveAvatarUrl } from "@/app/lib/avatar";
 
 const FriendList = () => {
   const { id, token } = useUserStore();
@@ -429,12 +430,6 @@ socket.on("friend:inviteNotification", (data) => {
       ? friend.username.username
       : friend.username ?? friend;
 
-  const friendAvatar =
-    typeof friend.username === "object" && friend.username.avatar
-      ? `http://localhost:5000${friend.username.avatar}?t=${Date.now()}`
-      : friend.avatar
-      ? `http://localhost:5000${friend.avatar}?t=${Date.now()}`
-      : "http://localhost:5000/uploads/default-avatar.jpg";
 
   return (
     <li
@@ -445,10 +440,11 @@ socket.on("friend:inviteNotification", (data) => {
         {/* Avatar */}
         <div className="relative">
           <img
-            src={friendAvatar}
+            src={resolveAvatarUrl(friend.avatar)}
             alt={friendName}
             className="w-10 h-10 rounded-full border border-white/20 object-cover"
           />
+
 
           <span
           className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-[#0f0f1a] animate-pulse ${
@@ -537,8 +533,7 @@ socket.on("friend:inviteNotification", (data) => {
   >
     <div className="flex items-center gap-3">
       <img
-        src={`http://localhost:5000${req.avatar}`}
-        alt={req.username}
+        src={resolveAvatarUrl(req.avatar)}
         className="w-8 h-8 rounded-full border border-white/20 object-cover"
       />
       <span className="font-medium">{req.username}</span>

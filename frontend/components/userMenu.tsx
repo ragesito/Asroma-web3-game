@@ -7,6 +7,7 @@ import { socket } from "@/app/lib/socket";
 import { useTranslation } from "react-i18next";
 import { RiLogoutBoxLine } from "react-icons/ri";
 import { IoIosSettings } from "react-icons/io";
+import { resolveAvatarUrl } from "@/app/lib/avatar";
 import Configs from "@/components/configs/configsModal";
 
 export default function UserMenu() {
@@ -36,12 +37,7 @@ export default function UserMenu() {
         className="flex items-center gap-2 bg-black/40 border border-orange-700/20 px-3 py-2 rounded-lg hover:bg-white/20 transition"
       >
         <img
-          key={avatar}
-          src={
-            avatar
-              ? `http://localhost:5000${avatar}?t=${Date.now()}`
-              : "http://localhost:5000/uploads/default-avatar.jpg"
-          }
+          src={resolveAvatarUrl(avatar)}
           alt="avatar"
           className="w-8 h-8 rounded-full border border-white/20 object-cover"
         />

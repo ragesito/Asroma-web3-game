@@ -5,6 +5,7 @@ import { useUserStore } from "@/app/store/userStore";
 import { motion } from "framer-motion";
 import Select from "@/components/select";
 import { useTranslation } from "react-i18next";
+import { resolveAvatarUrl } from "@/app/lib/avatar";
 export function LeaderboardTable({
   players,
   seasons,
@@ -96,10 +97,10 @@ export function LeaderboardTable({
 
                 <td className="flex items-center gap-3 py-2">
                   <img
-                    src={`http://localhost:5000${p.avatar}`}
+                    src={resolveAvatarUrl(p.avatar)}
                     width={32}
                     height={32}
-                    className="rounded-full"
+                    className="rounded-full object-cover"
                     alt="avatar"
                   />
                   {p.userId === myId ? (

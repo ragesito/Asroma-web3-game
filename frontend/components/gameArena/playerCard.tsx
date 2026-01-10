@@ -1,5 +1,7 @@
 "use client";
 import { useTranslation } from "react-i18next";
+import { resolveAvatarUrl } from "@/app/lib/avatar";
+
 export default function PlayerCard({
   username,
   avatar,
@@ -25,9 +27,7 @@ rounded-2xl p-6 backdrop-blur-xl text-white flex flex-col items-center shadow-xl
         <div className="w-20 h-20 rounded-full bg-white/10 animate-pulse mb-4" />
       ) : (
         <img
-          src={avatar
-      ? `http://localhost:5000${avatar.startsWith("/") ? avatar : `/${avatar}`}`
-      : "/default-avatar.jpg"}
+          src={resolveAvatarUrl(avatar)}
           alt="avatar"
           className="w-20 h-20 rounded-full border border-white/20 object-cover mb-4"
         />

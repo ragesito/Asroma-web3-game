@@ -7,6 +7,8 @@ import { io } from "socket.io-client";
 import { useTranslation } from "react-i18next";
 import Toast from "@/components/toast";
 import ToastPortal from "../toastPortal";
+import { resolveAvatarUrl } from "@/app/lib/avatar";
+
 const socket = io(process.env.NEXT_PUBLIC_API_URL!, { transports: ["websocket"] });
 export default function ChangeAvatar() {
   const { token, avatar, setAvatar } = useUserStore();
@@ -67,17 +69,10 @@ export default function ChangeAvatar() {
       </div>
 
       <img
-            src={
-                avatar
-                ? avatar.startsWith("http")
-                    ? avatar
-                    : `http://localhost:5000${avatar}`
-                : "http://localhost:5000/uploads/default-avatar.jpg"
-            }
-            alt="avatar"
-            className="w-24 h-24 rounded-full border border-white/20 object-cover"
-            />
-
+        src={resolveAvatarUrl(avatar)}
+        alt="avatar"
+        className="w-24 h-24 rounded-full border border-white/20 object-cover"
+      />
 
 
       <div className="flex flex-col items-center gap-2 w-full">
