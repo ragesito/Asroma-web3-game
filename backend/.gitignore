@@ -1,0 +1,25 @@
+# Node
+node_modules/
+dist/
+.env
+.DS_Store
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# TypeScript
+*.tsbuildinfo
+
+# Local environment
+.env.local
+.env.development.local
+.env.production.local
+
+# IDE configs
+.vscode/
+.idea/
+coverage/
+logs/
