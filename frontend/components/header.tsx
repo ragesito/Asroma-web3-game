@@ -208,9 +208,14 @@ hover:scale-[1.03]
         </div>
 
         {menuOpen && (
+           <div
+    className="fixed inset-0 z-40 top-[96px]"
+    onClick={() => setMenuOpen(false)}
+  >
   <div className="md:hidden mt-4 flex flex-col items-center gap-6 
-                  bg-black/20 backdrop-blur-lg  border border-black/10 
-                  rounded-2xl p-6 shadow-2xl">
+                  bg-black/20 backdrop-blur-lg mx-4  border border-black/10 
+                  rounded-2xl p-6 shadow-lg shadow-black/30"
+                  onClick={(e) => e.stopPropagation()}>
 
     {isLogged ? (
       <div className="w-full flex flex-row justify-center items-start gap-6">
@@ -228,7 +233,7 @@ hover:scale-[1.03]
       </div>
     ) : (
       <>
-      <div className="w-full flex flex-row justify-center items-center gap-6">
+      <div className="w-full flex flex-row justify-center items-center gap-6" >
 
     <button
     onClick={() => setShowLogin(true)}
@@ -295,9 +300,10 @@ hover:scale-[1.03]
                   >
                     <FaXTwitter className="w-8 h-8" />
                   </a>
+     </div>
     </div>
-
   </div>
+  
 )}
 
       </header>

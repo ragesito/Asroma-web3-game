@@ -6,6 +6,7 @@ import { useLeaderboard } from "@/app/hooks/useLeaderboard";
 import Particles from "@/components/spaceParticles";
 import Lottie from "lottie-react";
 import loaderAnimation from "@/public/lotties/finding.json";
+import LottieLoader from "@/components/lottieLoader";
 export default function Leaderboard() {
   const { players, loading, seasons, seasonId, setSeasonId } = useLeaderboard();
 
@@ -35,11 +36,7 @@ export default function Leaderboard() {
 
         <div className="relative z-10 w-full px-6 flex items-center justify-center text-white">
           {loading ? (
-            <Lottie
-          animationData={loaderAnimation}
-          loop={true}
-          style={{ width: 400, height: 400 }}
-        />
+             <LottieLoader />
           ) : (
             <LeaderboardTable
              players={players}

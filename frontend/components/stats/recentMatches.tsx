@@ -19,14 +19,14 @@ const variants = {
 export const RecentMatches = ({ matches }: { matches: Match[] }) => {
   if (!matches.length)
     return (
-      <div className="rounded-lg bg-white/5 border border-white/10 backdrop-blur-xl px-5 py-4 text-sm text-slate-300">
+      <div className="rounded-lg bg-white/5 border border-white/10 backdrop-blur-xl px-5 py-4 text-sm text-slate-300 shadow-lg shadow-black/30">
         Start playing to see your stats.
       </div>
     );
   const { t } = useTranslation();
   return (
     <motion.div
-      className="rounded-lg bg-white/5 border border-white/10 backdrop-blur-xl px-5 py-4 shadow-lg shadow-black/40"
+      className="rounded-lg bg-white/5 border border-white/10 backdrop-blur-xl px-5 py-4 shadow-lg shadow-black/30"
       variants={variants} initial="hidden" animate="visible" transition={{ delay: 1.2 }}
     >
       <div className="flex items-center justify-between mb-3">

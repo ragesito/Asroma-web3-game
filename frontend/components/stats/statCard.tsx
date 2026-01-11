@@ -14,7 +14,7 @@ const variants = {
 export const StatCard = ({ label, value, sublabel }: Props) => {
   return (
     <motion.div
-      className="flex flex-col gap-1 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl px-5 py-4 shadow-lg shadow-black/40"
+      className="flex flex-col gap-1 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl px-5 py-4 shadow-lg shadow-black/30"
       variants={variants} initial="hidden" animate="visible" transition={{ delay: 0.6 }}
     >
       <span className="text-xs uppercase tracking-wide text-slate-300">

@@ -407,7 +407,7 @@ socket.on("friend:inviteNotification", (data) => {
       <motion.aside
   className="
     w-full lg:w-2/4
-    bg-white/5 border border-white/10 rounded-lg p-5 shadow-lg backdrop-blur-xl
+    bg-white/5 border border-white/10 rounded-lg p-5 shadow-lg shadow-black/30 backdrop-blur-xl
     h-auto lg:h-[70vh]
     overflow-y-auto flex flex-col justify-between relative
   "
@@ -509,7 +509,7 @@ socket.on("friend:inviteNotification", (data) => {
       <motion.main
   className="
     w-full md:w-full lg:w-1/3
-    bg-white/5 border border-white/10 rounded-lg p-5 shadow-lg backdrop-blur-xl
+    bg-white/5 border border-white/10 rounded-lg p-5 shadow-lg shadow-black/30 backdrop-blur-xl
     h-auto lg:h-[70vh]
     overflow-y-auto flex flex-col justify-between relative
   "
@@ -563,7 +563,7 @@ socket.on("friend:inviteNotification", (data) => {
       <motion.aside
   className="
     w-full md:w-full lg:w-1/3
-    bg-white/5 border border-white/10 rounded-lg p-5 shadow-lg backdrop-blur-xl
+    bg-white/5 border border-white/10 rounded-lg p-5 shadow-lg shadow-black/30 backdrop-blur-xl
     h-auto lg:h-[70vh]
     overflow-y-auto flex flex-col justify-between relative
   "

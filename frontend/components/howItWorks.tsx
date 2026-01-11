@@ -14,7 +14,6 @@ const variants = {
 
 export default function HowItWorks() {
   const isMobile = useIsMobile();
-
   const steps = [
     {
       icon: <Wallet size={45} className="text-orange-700" />,
@@ -45,8 +44,8 @@ const router = useRouter();
     animate="visible"
     transition={{ delay: 1.5 + i * 0.2 }} 
   >
-    {isMobile ? (
-  <div className="p-8 rounded-2xl shadow-xl border border-orange-200/40 shadow-[0_0_90px_rgba(255,140,0,0.3)]">
+   {isMobile ? (
+  <div className="p-8 rounded-2xl shadow-lg border border-orange-700/50 shadow-black/30">
     <div className="flex justify-center mb-4">{s.icon}</div>
     <h3 className="text-2xl font-semibold text-center mb-3 text-shadow-lg">
       {s.title}
@@ -112,7 +111,7 @@ const router = useRouter();
 
           <button
             onClick={() => {
-              router.push("/");
+              console.log("connect wallet")
             }}
             className="
               relative 

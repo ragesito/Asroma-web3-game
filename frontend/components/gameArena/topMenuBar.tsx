@@ -46,8 +46,9 @@ const x = bRect.left - cRect.left + (bRect.width - width) / 3;
       className="
         absolute top-[6%] left-1/2 -translate-x-1/2
         flex z-30 mt-20
-        px-2 py-3 rounded-xl
-        backdrop-blur-sm shadow-[0_0_25px_#ff7a1815]
+        px-1 py-3 rounded-xl 
+        backdrop-blur-sm shadow-lg shadow-black/40
+        border border-orange-700/20
         gap-10 md:gap-14 lg:gap-16
         text-base md:text-lg lg:text-xl
       "
@@ -58,7 +59,8 @@ const x = bRect.left - cRect.left + (bRect.width - width) / 3;
             absolute
             h-[3px] bg-orange-400 rounded-full
             shadow-[0_0_8px_#ff7a18]
-            -bottom-1
+            -bottom-1 
+            mb-3
           "
           initial={false}
           animate={{ x: indicator.x, width: indicator.width }}

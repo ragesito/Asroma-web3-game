@@ -24,20 +24,22 @@ export default function Stats() {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const { t } = useTranslation();
-  const demoStats = {
-  totalWins: 0,
-  totalLosses: 0,
-  winRate: 0,
-  recentMatches: []
-};
-const variants = {    
+  const variants = {    
     hidden: { opacity: 0, x: -50 },
     visible: { opacity: 1, x: 0 },
   };
+  const EMPTY_STATS = {
+    gamesPlayed: 0,
+    wins: 0,
+    losses: 0,
+    winRate: 0,
+    totalEarnings: 0,
+    recentMatches: [],
+  };
 
-const [seasonId, setSeasonId] = useState<string>("current");
-const [mode, setMode] = useState<string>("all");
-const [seasons, setSeasons] = useState<Season[]>([]);
+  const [seasonId, setSeasonId] = useState<string>("current");
+  const [mode, setMode] = useState<string>("all");
+  const [seasons, setSeasons] = useState<Season[]>([]);
 
 useEffect(() => {
   api.get("/seasons")
@@ -58,6 +60,7 @@ useEffect(() => {
 
   useEffect(() => {
     if (!id)  {
+    setStats(EMPTY_STATS);
     setLoading(false);  
     return;
   } 
@@ -129,7 +132,7 @@ setStats(res?.data || null);
               <>
               {/* STATS FILTERS */}
 <motion.div
-  className="relative z-20 flex flex-wrap gap-4 bg-white/5 p-4 rounded-lg border border-white/10 backdrop-blur-xl overflow-visible"
+  className="relative z-20 flex flex-wrap gap-4 bg-white/5 p-4 rounded-lg border border-white/10 backdrop-blur-xl shadow-lg shadow-black/30 overflow-visible"
   variants={variants}
   initial="hidden"
   animate="visible"
@@ -174,17 +177,6 @@ setStats(res?.data || null);
                 <StatsSummary {...stats} />
                 <RecentMatches matches={stats.recentMatches} />
               </>
-            )}
-
-            {/* No stats */}
-            {!loading && !stats && (
-              <motion.div className="flex justify-center mt-20 pt-20 items-center"
-              variants={variants} initial="hidden" animate="visible" transition={{ delay: 1.5 }}>
-                <p className="text-center text-gray-400">
-                  No se encontraron estadísticas.
-                </p>
-              </motion.div>
-
             )}
           </div>
         </div>

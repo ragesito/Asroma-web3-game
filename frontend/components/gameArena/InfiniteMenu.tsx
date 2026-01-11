@@ -1158,21 +1158,8 @@ const InfiniteMenu: FC<InfiniteMenuProps> = ({
         (sk) => sk.run()
       );
     }
-if (typeof window !== "undefined" && window.innerWidth < 768 && sketch) {
-  // Camera extremely close to show only 1 disc
-  (sketch as any).SPHERE_RADIUS = 1.8;
-  sketch.camera.position[2] = 1.15;
 
-  // Bigger discs
-  sketch.scaleFactor = 2.1;
-
-  // Narrow field of view
-  sketch.camera.fov = Math.PI / 7;
-
-  // No rotational drift
-  (sketch as any).control.rotationVelocity = 0;
-}  
-    // ✅ Guardar instancia para permitir jumpToIndex globalmente
+    
 (window as any).__sketch = sketch;
 
 
@@ -1184,7 +1171,18 @@ if (typeof window !== "undefined" && window.innerWidth < 768 && sketch) {
 
     window.addEventListener('resize', handleResize);
     handleResize();
-    // 🔥 Escucha el evento que activa la rotación del menú
+    
+if (sketch && window.innerWidth < 768) {
+  requestAnimationFrame(() => {
+    sketch.resize(); 
+
+    sketch.camera.position[2] = 1.15;
+    sketch.scaleFactor = 2.1;
+    sketch.camera.fov = Math.PI / 7;
+
+  });
+}
+
 const handleJump = (e: any) => {
   if (sketch) {
     sketch.jumpToIndex(e.detail);
@@ -1299,7 +1297,7 @@ window.addEventListener("jumpToItem", handleJump);
   className={`
     absolute text-[1.45rem] leading-snug
     text-[#ffd6a3]
-    drop-shadow-[0_0_12px_#ff7a1888]
+    drop-shadow-[1_0_25px_#ff7a1888]
     transition-all duration-500 text-center
 
     /* Desktop */
