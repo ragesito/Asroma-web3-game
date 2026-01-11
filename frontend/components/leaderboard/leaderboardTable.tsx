@@ -26,11 +26,7 @@ export function LeaderboardTable({
   };
   return (
     <>
-    <motion.div
-  variants={variants}
-  initial="hidden"
-  animate="visible"
-  transition={{ delay: 0.7 }}
+    <div
   className="
     bg-black/20 backdrop-blur-xl p-6 h-[620px]
     rounded-lg border border-white/10 
@@ -118,7 +114,7 @@ export function LeaderboardTable({
           </tbody>
       </table>
       </div> 
-</motion.div>
+</div>
     {selectedPlayer && (
         <PlayerProfileModal
           player={selectedPlayer}

@@ -14,7 +14,7 @@ import "./globals.css";
 const urbanist = Urbanist({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "asroma",
+  title: "Asroma",
   description: "Crypto RPS Game",
 };
 

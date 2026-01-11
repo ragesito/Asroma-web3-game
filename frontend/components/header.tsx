@@ -234,11 +234,14 @@ hover:scale-[1.03]
     onClick={() => setShowLogin(true)}
   className="
     relative px-5 py-2 rounded-xl font-semibold text-white 
-      border border-white/20
-    shadow-[0_0_10px_rgba(255,255,255,0.3)]
+    backdrop-blur-xl  border border-orange-300
+    shadow-[0_0_8px_rgba(155,165,0,0.45)]
     
     transition-all duration-300
     overflow-hidden
+    hover:scale-[1.03]
+              hover:border-orange-300
+              hover:shadow-[0_0_20px_rgba(155,165,0,0.45)]
   "
 >
   <span className="relative z-10">Login</span>
@@ -249,11 +252,15 @@ hover:scale-[1.03]
     <button
     onClick={() => setShowRegister(true)}
   className="
-    relative px-5 py-2 rounded-xl font-semibold text-orange-500
-  border border-orange-500/40
-shadow-[0_0_10px_rgba(255,140,0,0.3)]
+    relative px-5 py-2 rounded-xl font-semibold text-white
+backdrop-blur-xl  border border-orange-700/60
+shadow-[0_0_8px_rgba(255,140,0,0.3)]
+
 transition-all duration-300
 overflow-hidden
+hover:scale-[1.03]
+              hover:border-orange-700
+              hover:shadow-[0_0_20px_rgba(255,165,0,0.45)]
   "
 >
   <span className="relative z-10">Register</span>

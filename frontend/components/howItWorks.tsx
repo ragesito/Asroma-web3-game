@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import { Wallet, Hand, Coins} from "lucide-react";
 import { useRouter } from "next/navigation";
 import ElectricBorder from "./electricBorder";
+import { useIsMobile } from "@/utils/useIsMobile";
+
 const variants = {    
     hidden: { opacity: 0, x: -50 },
     visible: { opacity: 1, x: 0 },
@@ -11,6 +13,8 @@ const variants = {
 
 
 export default function HowItWorks() {
+  const isMobile = useIsMobile();
+
   const steps = [
     {
       icon: <Wallet size={45} className="text-orange-700" />,
@@ -41,23 +45,36 @@ const router = useRouter();
     animate="visible"
     transition={{ delay: 1.5 + i * 0.2 }} 
   >
-    <ElectricBorder
-      thickness={3}
-      speed={0.89}
-      chaos={1}
-      color="#ff7b00"
-      className="rounded-lg"
-    >
-      <div className=" p-8 rounded-2xl  shadow-xl">
-        <div className="flex justify-center mb-4">{s.icon}</div>
-        <h3 className="text-2xl font-semibold text-center mb-3 text-shadow-lg">
-          {s.title}
-        </h3>
-        <p className="text-center text-gray-300 text-shadow-md">
-          {s.desc}
-        </p>
-      </div>
-    </ElectricBorder>
+    {isMobile ? (
+  <div className="p-8 rounded-2xl shadow-xl border border-orange-200/40 shadow-[0_0_90px_rgba(255,140,0,0.3)]">
+    <div className="flex justify-center mb-4">{s.icon}</div>
+    <h3 className="text-2xl font-semibold text-center mb-3 text-shadow-lg">
+      {s.title}
+    </h3>
+    <p className="text-center text-gray-300 text-shadow-md">
+      {s.desc}
+    </p>
+  </div>
+) : (
+  <ElectricBorder
+    thickness={3}
+    speed={0.89}
+    chaos={1}
+    color="#ff7b00"
+    className="rounded-lg"
+  >
+    <div className="p-8 rounded-2xl shadow-xl">
+      <div className="flex justify-center mb-4">{s.icon}</div>
+      <h3 className="text-2xl font-semibold text-center mb-3 text-shadow-lg">
+        {s.title}
+      </h3>
+      <p className="text-center text-gray-300 text-shadow-md">
+        {s.desc}
+      </p>
+    </div>
+  </ElectricBorder>
+)}
+
   </motion.div>
         ))}
       </div>

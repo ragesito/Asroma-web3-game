@@ -1197,7 +1197,7 @@ window.addEventListener("jumpToItem", handleJump);
       window.removeEventListener('resize', handleResize);
       window.removeEventListener("jumpToItem", handleJump);
     };
-  }, [items]);
+  }, [items.length]);
 
   const handleButtonClick = () => {
     if (!activeItem?.link) return;
