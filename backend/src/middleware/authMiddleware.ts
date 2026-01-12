@@ -11,24 +11,32 @@ export interface AuthRequest extends Request {
   user?: AuthUser;
 }
 
+const isDev = process.env.NODE_ENV !== "production";
+
+const devLog = (...args: any[]) => {
+  if (isDev) {
+    console.log(...args);
+  }
+};
+
 export const verifyToken = async (req: AuthRequest, res: Response, next: NextFunction) => {
   const header = req.header("Authorization");
-     console.log("🧠 verifyToken recibido:", header);
+     devLog("🧠 verifytoken received:", header);
 
   if (!header) {
-    console.log("❌ No se envió Authorization header");
-    return res.status(401).json({ message: "Token no proporcionado" });
+    devLog("❌ Authorization header was not sent");
+    return res.status(401).json({ message: "Token not provided" });
   }
 
   const token = header.startsWith("Bearer ") ? header.slice(7) : header;
   if (!token) {
-    console.log("❌ Header sin token Bearer:", header);
-    return res.status(401).json({ message: "Formato de token inválido" });
+    devLog("❌ Header without Bearer token:", header);
+    return res.status(401).json({ message: "Invalid token format" });
   }
 
   if (!process.env.JWT_SECRET) {
     console.error("❌ JWT_SECRET no definido en el .env");
-    return res.status(500).json({ message: "Configuración del servidor inválida" });
+    return res.status(500).json({ message: "Invalid server configuration" });
   }
 
   try {
@@ -36,16 +44,16 @@ export const verifyToken = async (req: AuthRequest, res: Response, next: NextFun
 
     const user = await User.findById(decoded.id).lean();
     if (!user) {
-      console.log("❌ Usuario no encontrado en base de datos");
-      return res.status(401).json({ message: "Usuario no encontrado" });
+      devLog("❌ User not found in the database");
+      return res.status(401).json({ message: "User not found" });
     }
 
     req.user = { _id: user._id.toString(), username: user.username };
-    console.log("✅ Token verificado para:", user.username);
+    devLog("✅ Token verified for:", user.username);
 
     next();
   } catch (err) {
-    console.error("❌ Token inválido o expirado:", err);
-    return res.status(401).json({ message: "Token inválido o expirado" });
+    console.error("❌ Invalid or expired token:", err);
+    return res.status(401).json({ message: "Invalid or expired token" });
   }
 };

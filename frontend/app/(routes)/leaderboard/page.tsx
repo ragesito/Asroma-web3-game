@@ -20,7 +20,7 @@ export default function Leaderboard() {
           backgroundImage: "url('/vecteezy_space-alien-planet-landscape-cosmic-background_16911692.jpg')",
         }}
       >
-        <div className="absolute inset-0 bg-black/30" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-transparent"></div>
         <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}>
         <Particles
           particleColors={['#ffffff', '#ffffff']}

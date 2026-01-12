@@ -68,7 +68,7 @@ export function LeaderboardTable({
   >
       <table className="w-full text-left">
         <thead>
-          <tr className="text-gray-300 text-sm border-b border-white/10">
+          <tr className="text-gray-500 text-sm border-b border-white/15">
             <th className="py-2">{t("rank")}</th>
             <th>{t("player")}</th>
             <th>{t("wins")}</th>

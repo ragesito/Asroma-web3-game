@@ -1,4 +1,3 @@
-import { FlipWords } from "./flipWords";
 import { motion } from "motion/react";
 import { SparklesCore } from "@/components/backgroundLines";
 import Image from "next/image";
