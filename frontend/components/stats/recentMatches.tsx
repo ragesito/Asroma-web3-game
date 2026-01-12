@@ -19,7 +19,7 @@ const variants = {
 export const RecentMatches = ({ matches }: { matches: Match[] }) => {
   if (!matches.length)
     return (
-      <div className="rounded-lg bg-white/5 border border-white/10 backdrop-blur-xl px-5 py-4 text-sm text-slate-300 shadow-lg shadow-black/30">
+      <div className=" relative rounded-lg bg-white/5 border bottom-9 md:bottom-6 border-white/10 backdrop-blur-xl px-5 py-4 text-sm text-slate-300 shadow-lg shadow-black/30">
         Start playing to see your stats.
       </div>
     );

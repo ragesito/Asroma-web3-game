@@ -132,7 +132,7 @@ setStats(res?.data || null);
               <>
               {/* STATS FILTERS */}
 <motion.div
-  className="relative z-20 flex flex-wrap gap-4 bg-white/5 p-4 rounded-lg border border-white/10 backdrop-blur-xl shadow-lg shadow-black/30 overflow-visible"
+  className="relative z-20 flex flex-wrap gap-4 md:mb-0 mb-[-8px] bg-white/5 p-4 rounded-lg border border-white/10 backdrop-blur-xl shadow-lg shadow-black/30 overflow-visible"
   variants={variants}
   initial="hidden"
   animate="visible"

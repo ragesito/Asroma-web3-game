@@ -1,19 +1,13 @@
+"use client";
+
+
 import { motion } from "motion/react";
-import { SparklesCore } from "@/components/backgroundLines";
-import Image from "next/image";
-import { useRouter } from "next/navigation"; 
 
 const HeroTextv2 = () => {
-  const words = [
-    <Image key="rock" src="/rock.png" alt="Rock" width={120} height={120} />,
-    <Image key="paper" src="/paper.png" alt="Paper" width={120} height={130} />,
-    <Image key="scissors" src="/scissors.png" alt="Scissors" width={120} height={120} />,
-];
   const variants = {    
     hidden: { opacity: 0, x: -50 },
     visible: { opacity: 1, x: 0 },
   };
-  const router = useRouter();
   return (
     <div className="relative w-full bg-no-repeat py-20 md:py-24 px-4 flex justify-center">
                 <div className="h-[10rem] w-full  flex flex-col items-center justify-center rounded-md">

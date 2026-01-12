@@ -32,7 +32,9 @@ export function LeaderboardTable({
     animate="visible"
     transition={{ delay: 0.4 }}
     className="
-    bg-white/5 backdrop-blur-xl p-6 h-[620px]
+    bg-white/5 backdrop-blur-xl p-4 md:p-6
+    h-auto md:h-[620px]
+
     rounded-lg border border-white/10 
     w-full max-w-5xl mx-auto
     mt-6 md:mb-0 mb-0 shadow-lg shadow-black/30
@@ -60,7 +62,7 @@ export function LeaderboardTable({
     
   <div
     className="
-      max-h-[58vh] 
+      max-h-[60dvh] md:max-h-[58vh]
       overflow-y-auto 
       custom-scroll
       pr-2

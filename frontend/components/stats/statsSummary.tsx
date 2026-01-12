@@ -20,7 +20,7 @@ export const StatsSummary = ({
 }: Props) => {
   const { t } = useTranslation();
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="grid mb-4 grid-cols-1 md:grid-cols-3 gap-4">
       <div className="md:col-span-2 grid grid-cols-2 gap-3">
         <StatCard
           label={t("matches_played")}

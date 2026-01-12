@@ -15,7 +15,7 @@ export default function Leaderboard() {
     <>
       <TransitionPage />
       <div
-        className="flex min-h-[100vh] bg-cover bg-center relative"
+        className="flex min-h-screen md:min-h-[100vh] bg-cover bg-center relative"
         style={{
           backgroundImage: "url('/vecteezy_space-alien-planet-landscape-cosmic-background_16911692.jpg')",
         }}
