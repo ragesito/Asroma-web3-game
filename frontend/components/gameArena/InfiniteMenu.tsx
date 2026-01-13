@@ -1,3 +1,5 @@
+"use client";
+
 import { FC, useRef, useState, useEffect, MutableRefObject } from 'react';
 import { mat4, quat, vec2, vec3 } from 'gl-matrix';
 import { useHydrated } from '@/app/hooks/useHydrated';

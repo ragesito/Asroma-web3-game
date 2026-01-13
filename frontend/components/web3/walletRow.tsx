@@ -1,3 +1,5 @@
+"use client";
+
 import { useSelectedWalletStore } from "@/app/store/walletStore";
 import SolanaIcon from "../solanaIcon";
 import {Archive, ExternalLink, Copy, Key } from "lucide-react";

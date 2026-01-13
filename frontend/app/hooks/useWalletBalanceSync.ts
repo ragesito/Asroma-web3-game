@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect } from "react";
 import api from "@/app/lib/api";
 import { useWalletsStore } from "@/app/store/walletsStore";
