@@ -1,6 +1,6 @@
 import cron from "node-cron";
 import { User } from "../models/user";
-import { logger } from "../uploads/utils/logger";
+import { logger } from "../utils/logger";
 
 cron.schedule("0 * * * *", async () => {
   try {

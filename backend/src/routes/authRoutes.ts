@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { User } from "../models/user";
 import { z } from "zod";
-import { logger } from "../uploads/utils/logger";
+import { logger } from "../utils/logger";
 import { sendResetPasswordEmail, sendVerificationEmail } from "../services/emailService";
 import { authRateLimiter } from "../middleware/rateLimit";
 import { createInternalWalletForUser } from "../services/walletService";

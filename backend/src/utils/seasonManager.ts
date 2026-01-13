@@ -1,4 +1,4 @@
-import { Season } from "../../models/season";
+import { Season } from "../models/season";
 
 export async function createNewSeason() {
   const now = new Date();
