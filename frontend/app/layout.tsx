@@ -15,7 +15,32 @@ const urbanist = Urbanist({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Asroma",
-  description: "Crypto RPS Game",
+  description:
+    "Play Rock Paper Scissors on-chain. Predict, compete and win with Solana.",
+  metadataBase: new URL("https://www.asroma.app"),
+  openGraph: {
+    title: "Asroma – Crypto RPS Game",
+    description:
+      "A Web3 Rock Paper Scissors game. Play, predict and win with Solana.",
+    url: "https://www.asroma.app",
+    siteName: "Asroma",
+    images: [
+      {
+        url: "/Asroma-Logo.png",
+        width: 1024,
+        height: 1024,
+        alt: "Asroma – Crypto RPS Game",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Asroma – Crypto RPS Game",
+    description:
+      "A Web3 Rock Paper Scissors game. Play, predict and win with Solana.",
+    images: ["/Asroma-Logo.png"],
+  },
 };
 
 export default function RootLayout({
