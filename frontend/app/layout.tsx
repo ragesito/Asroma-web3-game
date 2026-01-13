@@ -26,9 +26,9 @@ export const metadata: Metadata = {
     siteName: "Asroma",
     images: [
       {
-        url: "/Asroma-Logo.png",
-        width: 1024,
-        height: 1024,
+        url: "/asroma-logo.png",
+        width: 1200,
+        height: 630,
         alt: "Asroma – Crypto RPS Game",
       },
     ],
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     title: "Asroma – Crypto RPS Game",
     description:
       "A Web3 Rock Paper Scissors game. Play, predict and win with Solana.",
-    images: ["/Asroma-Logo.png"],
+    images: ["/asroma-logo.png"],
   },
 };
 
