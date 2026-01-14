@@ -23,7 +23,4 @@ export async function lockFundsForMatch(
   }
 
   await escrowReceiveFromKeypair(keypair, amount);
-
-  wallet.locked += amount;
-  await wallet.save();
 }

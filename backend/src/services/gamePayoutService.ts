@@ -24,14 +24,4 @@ export async function settleMatch({
   );
 
   await escrowFee(fee);
-
-  winnerWallet.locked -= stake;
-  winnerWallet.available += payout;
-  await winnerWallet.save();
-
-  const loserWallet = await Wallet.findById(loserWalletId);
-  if (loserWallet) {
-    loserWallet.locked -= stake;
-    await loserWallet.save();
-  }
 }
