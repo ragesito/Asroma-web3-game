@@ -58,7 +58,12 @@ const GameLobby = () => {
 
     console.log("🎯 Detectada invitación pendiente → uniendo a sala:", roomId);
 
-    socket.emit("game:join", { roomId, playerId: id });
+    socket.emit("game:join", {
+      roomId,
+      playerId: id,
+      walletId,
+    });
+
 
     sessionStorage.removeItem("pendingInviteJoin");
   }
@@ -231,7 +236,13 @@ socket.on("game:privateReady", ({ roomId, players }) => {
 
     const newRoomId = Math.random().toString(36).substring(2, 8).toUpperCase();
     setRoomId(newRoomId);
-    socket.emit("game:create", { roomId: newRoomId, playerId: id });
+    socket.emit("game:create", {
+  roomId: newRoomId,
+  playerId: id,
+  stake: betAmount!,
+  walletId,
+});
+
     
 
   };
@@ -255,7 +266,12 @@ socket.on("game:privateReady", ({ roomId, players }) => {
     };
     const submitJoin = (joinCode: string) => {
     setRoomId(joinCode);
-    socket.emit("game:join", { roomId: joinCode, playerId: id });
+    socket.emit("game:join", {
+  roomId: joinCode,
+  playerId: id,
+  walletId,
+});
+
     
     setJoinOpen(false);
 };
