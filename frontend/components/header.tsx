@@ -162,7 +162,7 @@ hover:scale-[1.03]
 
 
                   <a
-                    href="https://x.com/TU_USUARIO"
+                    href="https://x.com/asromapp"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-white flex items-center gap-2 hover:text-orange-600 transition"
@@ -192,7 +192,7 @@ hover:scale-[1.03]
 
 
                   <a
-                    href="https://x.com/TU_USUARIO"
+                    href="https://x.com/asromapp"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-white flex items-center gap-2 hover:text-orange-600 transition"
@@ -292,7 +292,7 @@ hover:scale-[1.03]
 
 
                   <a
-                    href="https://x.com/TU_USUARIO"
+                    href="https://x.com/asromapp"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-white flex items-center gap-2 hover:text-orange-600 transition"
