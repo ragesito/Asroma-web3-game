@@ -64,15 +64,9 @@ export default function UserMenu() {
           </button>
           <button
             onClick={() => {
-              const userId = useUserStore.getState().id; 
-              if (userId) {
-                console.log("🚪 Emite manualDisconnect antes de salir:", userId);
-                socket.emit("manualDisconnect", userId);
-              }
-
               if (socket.connected) {
+                socket.emit("manualDisconnect");
                 socket.disconnect();
-                console.log("🔌 Socket desconectado localmente");
               }
 
               useUserStore.getState().clearUser();

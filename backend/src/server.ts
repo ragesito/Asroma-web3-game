@@ -6,6 +6,7 @@ import "./cron/cleanupUnverifiedUsers";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { Server } from "socket.io";
+import { socketAuth } from "./middleware/socketAuth";
 import { connectDB } from "./config/db";
 import { setupChatSocket } from "./sockets/chatSocket";
 import authRoutes from "./routes/authRoutes";
@@ -23,7 +24,6 @@ import leaderboardUserRoutes from "./routes/leaderboardUser";
 import { startSeasonWatcher } from "./utils/seasonManager";
 import seasonRoutes from "./routes/seasonRoutes";
 import walletRoutes from "./routes/walletRoutes";
-import balanceRoutes from "./routes/balanceRoutes";
 import phantomAuthRoutes from "./routes/phantomAuthRoutes";
 connectDB();
 
@@ -41,6 +41,9 @@ const io = new Server(server, {
     credentials: true,
   },
 });
+
+// Every socket must present a valid JWT before any handler can run.
+io.use(socketAuth);
 
 app.set("io", io);
 app.use(express.json());
@@ -67,10 +70,8 @@ app.use("/api/leaderboard/user", leaderboardUserRoutes);
 app.use("/api/public", publicUserRoutes);
 app.use("/api/seasons", seasonRoutes);
 app.use("/api/wallets", walletRoutes);
-app.use("/wallets", balanceRoutes);
 app.use("/api/auth/phantom", phantomAuthRoutes);
 app.use("/uploads", (req, res, next) => {res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");next();}, express.static(path.join(process.cwd(), "uploads")));
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 // Sockets (chat)
 setupChatSocket(io);
 setupFriendSocket(io);

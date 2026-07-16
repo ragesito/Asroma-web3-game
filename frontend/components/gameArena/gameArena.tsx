@@ -86,7 +86,7 @@ export default function GameArena({
         setOpponentMove(null);
         setRoundResult(null);
 
-        socket.emit("game:roundReady", { roomId, playerId });
+        socket.emit("game:roundReady", { roomId });
       }, 3500);
     });
 
@@ -129,7 +129,7 @@ export default function GameArena({
   const sendMove = (move: Move) => {
     if (selectedMove || gameOver) return;
     setSelectedMove(move);
-    socket.emit("game:move", { roomId, playerId, move });
+    socket.emit("game:move", { roomId, move });
   };
 
   const moves = [

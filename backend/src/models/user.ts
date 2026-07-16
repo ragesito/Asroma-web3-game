@@ -14,6 +14,9 @@ export interface IUser extends Document {
   verificationLockedUntil?: Date;
   resetPasswordCode?: string;
   resetPasswordExpires?: Date;
+  resetPasswordAttempts?: number;
+  resetPasswordLockedUntil?: Date;
+  lastResetSentAt?: Date;
   walletMasterKeyEnc?: string;
   phantomPublicKey?: string;
   phantomLinkedAt?: Date;
@@ -36,6 +39,11 @@ const userSchema = new Schema<IUser>(
     lastVerificationSentAt: { type: Date, default: null },
     resetPasswordCode: { type: String },
     resetPasswordExpires: { type: Date },
+    // Separate from the verification counters on purpose: sharing them would
+    // let one code namespace consume the other's attempt budget.
+    resetPasswordAttempts: { type: Number, default: 0 },
+    resetPasswordLockedUntil: { type: Date, default: null },
+    lastResetSentAt: { type: Date, default: null },
     walletMasterKeyEnc: { type: String, select: false },
     phantomPublicKey: { type: String, unique: true, sparse: true },
     phantomLinkedAt: { type: Date },

@@ -47,7 +47,7 @@ const FriendList = () => {
     setLoading(false);
     return;
   }
-    socket.emit("requestStatusSync", id);
+    socket.emit("requestStatusSync");
     const fetchFriendsAndRequests = async () => {
       try {
         const friendsRes = await fetch(
@@ -193,7 +193,7 @@ socket.on("friend:inviteNotification", (data) => {
 
       const interval = setInterval(() => {
         if (id) {
-          socket.emit("heartbeat", id);
+          socket.emit("heartbeat");
         }
       }, 20000); 
       return () => {
@@ -230,8 +230,7 @@ socket.on("friend:inviteNotification", (data) => {
       const data = await res.json();
       if (res.ok) {
           socket.emit("friendRequest:send", {
-          requester: id,
-          recipient: data.recipientId, 
+          recipient: data.recipientId,
         });
         setToast({ message: t("request_sent_to", { newFriend }), type: "success" });
       } else {
@@ -278,15 +277,10 @@ socket.on("friend:inviteNotification", (data) => {
   avatar: data.requester.avatar,
 };
 
+        // The server rebuilds the accepter's details from the authenticated
+        // socket; it only needs to know who to notify.
         socket.emit("friendRequest:accepted", {
-  requester: {
-    _id: data.requester._id,
-    username: data.requester.username,
-    avatar: data.requester.avatar,
-  },
-  recipient: {
-    _id: id,
-  },
+  requesterId: data.requester._id,
 });
 
       setFriends((prev) => {
@@ -369,7 +363,12 @@ socket.on("friend:inviteNotification", (data) => {
     const data = await res.json();
 
     if (res.ok) {
-      socket.emit("friend:remove", { from: id, to: friendUsername });
+      // `to` must be a user id: the server looks the recipient up in a map
+      // keyed by id. This previously sent a username, so the notification
+      // never reached anyone.
+      if (typeof friend === "object" && friend._id) {
+        socket.emit("friend:remove", { to: friend._id });
+      }
       setFriends((prev) =>
         prev.filter((f: any) =>
           typeof f === "object" ? f.username !== friendUsername : f !== friendUsername

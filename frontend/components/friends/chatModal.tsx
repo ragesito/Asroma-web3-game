@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { socket } from "@/app/lib/socket";
+import api from "@/app/lib/api";
 import { useTranslation } from "react-i18next";
 
 interface PrivateChatModalProps {
@@ -40,10 +41,10 @@ export default function PrivateChatModal({
 
     const fetchMessages = async () => {
       try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/messages/${id}/${friend._id}`
-        );
-        const data = await res.json();
+        // Through `api`, not raw fetch: the route requires a JWT and `api`
+        // attaches it.
+        const res = await api.get(`/messages/${id}/${friend._id}`);
+        const data = res.data;
         if (!Array.isArray(data)) return;
 
         setMessages(
@@ -59,8 +60,8 @@ export default function PrivateChatModal({
 
     fetchMessages();
 
-    if (!socket.connected) socket.connect();
-    socket.emit("registerUser", id);
+    // ClientRoot owns the socket connection; it is already authenticated.
+    socket.emit("registerUser");
 
     const handleMessage = (data: any) => {
       if (
@@ -82,10 +83,10 @@ export default function PrivateChatModal({
   const handleSend = () => {
     if (!message.trim()) return;
 
-    const newMsg = { from: id, to: friend._id, text: message };
-
-    setMessages((prev) => [...prev, newMsg]);
-    socket.emit("private:message", newMsg);
+    // The local echo needs `from` to render on the right side; the server
+    // takes the sender from the authenticated socket and ignores it.
+    setMessages((prev) => [...prev, { from: id, text: message }]);
+    socket.emit("private:message", { to: friend._id, text: message });
 
     setMessage("");
   };

@@ -3,13 +3,11 @@ import { useState } from "react";
 import { updateAvatar } from "@/app/lib/user";
 import { useUserStore } from "@/app/store/userStore";
 import { useHydrated } from "@/app/hooks/useHydrated";
-import { io } from "socket.io-client";
 import { useTranslation } from "react-i18next";
 import Toast from "@/components/toast";
 import ToastPortal from "../toastPortal";
 import { resolveAvatarUrl } from "@/app/lib/avatar";
 
-const socket = io(process.env.NEXT_PUBLIC_API_URL!, { transports: ["websocket"] });
 export default function ChangeAvatar() {
   const { token, avatar, setAvatar } = useUserStore();
   const hydrated = useHydrated();

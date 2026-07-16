@@ -1,10 +1,12 @@
 // backend/src/sockets/gameSocket.ts
 import { Server, Socket } from "socket.io";
+import { Types } from "mongoose";
 import { v4 as uuidv4 } from "uuid";
 import { User } from "../models/user";
+import { Wallet } from "../models/wallet";
 import { Match } from "../models/match";
 import { Season } from "../models/season";
-import { lockFundsForMatch } from "../services/gameFundsService";
+import { lockFundsForBothPlayers } from "../services/gameFundsService";
 import { settleMatch } from "../services/gamePayoutService";
 
 interface PlayerData {
@@ -13,15 +15,21 @@ interface PlayerData {
 }
 type Move = "rock" | "paper" | "scissors";
 
+const MOVES: readonly Move[] = ["rock", "paper", "scissors"];
+const isMove = (value: unknown): value is Move =>
+  typeof value === "string" && MOVES.includes(value as Move);
+
 interface GameRoom {
-  players: string[]; 
+  players: string[];
   moves: Record<string, Move | null>;
   scores: Record<string, number>;
   rounds: number;
   isActive: boolean;
-  readyCount: number;     
-  roundReadyCount: number; 
-  isRanked: boolean, 
+  // Sets, not counters: a counter cannot tell one player pressing ready
+  // twice from both players being ready.
+  readyPlayers: Set<string>;
+  roundReadyPlayers: Set<string>;
+  isRanked: boolean,
   wallets: Record<string, string>;
   stake: number;
 }
@@ -46,7 +54,20 @@ for (const stake of ALLOWED_STAKES) {
  
   
 
-  const socketsByPlayer = new Map<string, string>(); 
+  const socketsByPlayer = new Map<string, string>();
+
+  /**
+   * A wallet id from the client is only a claim. Rejecting it here fails the
+   * player fast with a clear error; lockFundsForBothPlayers re-checks
+   * ownership before it decrypts anything, and that check is the real gate.
+   */
+  const ownsWallet = async (userId: string, walletId: string) => {
+    if (!walletId || !Types.ObjectId.isValid(walletId)) return false;
+    return Boolean(
+      await Wallet.exists({ _id: walletId, owner: userId, archived: false })
+    );
+  };
+
  const saveMatch = async (room: GameRoom, winnerId: string | null) => {
   try {
     const currentSeason = await Season.findOne({ isActive: true }).sort({ startDate: -1 });
@@ -75,22 +96,39 @@ for (const stake of ALLOWED_STAKES) {
 };
 
   io.on("connection", (socket: Socket) => {
-    console.log("🎮 Conectado:", socket.id);
+    // socketAuth (io.use) guarantees this is set and verified.
+    const playerId: string = socket.data.userId;
+    console.log("🎮 Conectado:", socket.id, playerId);
 
-    socket.on("game:register", ({ playerId }: { playerId: string }) => {
-      if (!playerId) return;
+    socketsByPlayer.set(playerId, socket.id);
+
+    socket.on("game:register", () => {
+      // Identity comes from the handshake; the event only refreshes the
+      // socket id after a reconnect.
       socketsByPlayer.set(playerId, socket.id);
-      socket.data.playerId = playerId;
     });
 
     socket.on(
   "game:create",
-  ({ roomId, playerId, stake, walletId }: {
+  async ({ roomId, stake, walletId }: {
     roomId: string;
-    playerId: string;
     stake: number;
     walletId: string;
   }) => {
+      if (!ALLOWED_STAKES.includes(stake)) {
+        socket.emit("game:error", { message: "Invalid stake" });
+        return;
+      }
+
+      if (rooms.has(roomId)) {
+        socket.emit("game:error", { message: "Room already exists" });
+        return;
+      }
+
+      if (!(await ownsWallet(playerId, walletId))) {
+        socket.emit("game:error", { message: "Invalid wallet" });
+        return;
+      }
 
       rooms.set(roomId, {
       players: [playerId],
@@ -101,27 +139,27 @@ for (const stake of ALLOWED_STAKES) {
       moves: {},
       scores: { [playerId]: 0 },
       rounds: 0,
-      readyCount: 0,
-      roundReadyCount: 0,
+      readyPlayers: new Set(),
+      roundReadyPlayers: new Set(),
       isActive: false,
       isRanked: false,
     });
 
       socket.join(roomId);
       console.log(`🆕 Sala privada creada: ${roomId} por ${playerId}`);
-      
+
       io.to(roomId).emit("game:waiting", {
         roomId,
         createdBy: playerId,
+        stake,
       });
 
     });
 
     socket.on(
   "game:join",
-  async ({ roomId, playerId, walletId }: {
+  async ({ roomId, walletId }: {
     roomId: string;
-    playerId: string;
     walletId: string;
   }) => {
 
@@ -135,6 +173,14 @@ for (const stake of ALLOWED_STAKES) {
         socket.emit("game:error", { message: "Sala llena" });
         return;
       }
+      if (room.players.includes(playerId)) {
+        socket.emit("game:error", { message: "Already in this room" });
+        return;
+      }
+      if (!(await ownsWallet(playerId, walletId))) {
+        socket.emit("game:error", { message: "Invalid wallet" });
+        return;
+      }
 
       room.players.push(playerId);
       room.scores[playerId] = 0;
@@ -143,8 +189,11 @@ for (const stake of ALLOWED_STAKES) {
       try {
         const [p1, p2] = room.players;
 
-        await lockFundsForMatch(room.wallets[p1], room.stake);
-        await lockFundsForMatch(room.wallets[p2], room.stake);
+        await lockFundsForBothPlayers(
+          { ownerId: p1, walletId: room.wallets[p1] },
+          { ownerId: p2, walletId: room.wallets[p2] },
+          room.stake
+        );
       } catch (err) {
         console.error("❌ Error locking funds (private match):", err);
 
@@ -178,27 +227,24 @@ for (const stake of ALLOWED_STAKES) {
       
     });
 
-    socket.on("friend:inviteToRoom", async ({ roomId, fromUserId, toUserId }) => {
+    socket.on("friend:inviteToRoom", async ({ roomId, toUserId }) => {
       const room = rooms.get(roomId);
+      const fromUserId = playerId;
 
       if (!room) {
-        const fromSocket = socketsByPlayer.get(fromUserId);
-        if (fromSocket) {
-          io.to(fromSocket).emit("game:error", {
-            message: "Room not found",
-          });
-        }
+        socket.emit("game:error", { message: "Room not found" });
+        return;
+      }
+
+      // Only someone actually in the room may invite to it.
+      if (!room.players.includes(fromUserId)) {
+        socket.emit("game:error", { message: "Not your room" });
         return;
       }
 
       const targetSocketId = socketsByPlayer.get(toUserId);
       if (!targetSocketId) {
-        const fromSocket = socketsByPlayer.get(fromUserId);
-        if (fromSocket) {
-          io.to(fromSocket).emit("game:error", {
-            message: "This friend is offline",
-          });
-        }
+        socket.emit("game:error", { message: "This friend is offline" });
         return;
       }
 
@@ -212,7 +258,7 @@ for (const stake of ALLOWED_STAKES) {
       });
     });
 
-    socket.on("game:cancelPrivate", ({ roomId, playerId }: { roomId: string; playerId: string }) => {
+    socket.on("game:cancelPrivate", ({ roomId }: { roomId: string }) => {
       const room = rooms.get(roomId);
       if (!room) return;
 
@@ -227,16 +273,12 @@ for (const stake of ALLOWED_STAKES) {
     socket.on(
   "game:queue",
   async ({
-    playerId,
     walletId,
     stake,
   }: {
-    playerId: string;
     walletId: string;
     stake: number;
   }) => {
-    if (!playerId) return;
-
     console.log(`⏳ ${playerId} buscando partida...`);
 
     if (!ALLOWED_STAKES.includes(stake)) {
@@ -244,8 +286,22 @@ for (const stake of ALLOWED_STAKES) {
       return;
     }
 
+    if (!(await ownsWallet(playerId, walletId))) {
+      socket.emit("game:error", { message: "Invalid wallet" });
+      return;
+    }
+
+    // Queueing twice would let a player be matched against themselves:
+    // both stakes get locked from the same wallet and getWinner always
+    // draws, so the match can never reach 3 and the funds never come back.
+    for (const [, q] of waitingPlayersByStake) {
+      if (q.some((p) => p.playerId === playerId)) {
+        socket.emit("game:error", { message: "Already in queue" });
+        return;
+      }
+    }
+
     socketsByPlayer.set(playerId, socket.id);
-    socket.data.playerId = playerId;
 
     const queue = waitingPlayersByStake.get(stake)!;
 
@@ -270,8 +326,8 @@ for (const stake of ALLOWED_STAKES) {
         scores: { [p1]: 0, [p2]: 0 },
         rounds: 0,
         isActive: true,
-        readyCount: 0,
-        roundReadyCount: 0,
+        readyPlayers: new Set(),
+        roundReadyPlayers: new Set(),
         isRanked: true,
         stake,
       };
@@ -282,11 +338,14 @@ for (const stake of ALLOWED_STAKES) {
       const s2Id = socketsByPlayer.get(p2);
 
       try {
-        await lockFundsForMatch(w1, stake);
-        await lockFundsForMatch(w2, stake);
+        await lockFundsForBothPlayers(
+          { ownerId: p1, walletId: w1 },
+          { ownerId: p2, walletId: w2 },
+          stake
+        );
       } catch (err) {
         console.error("❌ Error locking funds:", err);
-        
+
         if (s1Id) io.to(s1Id).emit("game:error", { message: "Insufficient funds" });
         if (s2Id) io.to(s2Id).emit("game:error", { message: "Insufficient funds" });
 
@@ -313,7 +372,7 @@ for (const stake of ALLOWED_STAKES) {
   }
 );
 
-    socket.on("game:cancelQueue", ({ playerId }: { playerId: string }) => {
+    socket.on("game:cancelQueue", () => {
   for (const [, queue] of waitingPlayersByStake) {
     const idx = queue.findIndex((q) => q.playerId === playerId);
     if (idx !== -1) {
@@ -326,10 +385,11 @@ for (const stake of ALLOWED_STAKES) {
     socket.on("game:ready", ({ roomId }) => {
   const room = rooms.get(roomId);
   if (!room) return;
+  if (!room.players.includes(playerId)) return;
 
-  room.readyCount = (room.readyCount || 0) + 1;
+  room.readyPlayers.add(playerId);
 
-  if (room.readyCount === 2) {
+  if (room.readyPlayers.size === room.players.length && room.players.length === 2) {
     console.log("⏱️ Ambos jugadores listos → iniciando ronda 1");
 
     io.to(roomId).emit("game:roundStart");
@@ -340,15 +400,20 @@ for (const stake of ALLOWED_STAKES) {
   rooms.set(roomId, room);
 });
 
-    socket.on("game:roundReady", ({ roomId, playerId }) => {
+    socket.on("game:roundReady", ({ roomId }) => {
       const room = rooms.get(roomId);
       if (!room || !room.isActive) return;
+      if (!room.players.includes(playerId)) return;
 
-      room.roundReadyCount = (room.roundReadyCount || 0) + 1;
+      // Ignore while a round is already running, otherwise a client can
+      // re-arm the timer forever and the round never resolves.
+      if (roundTimers.has(roomId)) return;
 
-      if (room.roundReadyCount === 2) {
+      room.roundReadyPlayers.add(playerId);
 
-        room.roundReadyCount = 0;
+      if (room.roundReadyPlayers.size === 2) {
+
+        room.roundReadyPlayers.clear();
 
         io.to(roomId).emit("game:roundStart");
 
@@ -358,9 +423,16 @@ for (const stake of ALLOWED_STAKES) {
       rooms.set(roomId, room);
     });
 
-socket.on("game:move", ({ roomId, playerId, move }: { roomId: string; playerId: string; move: Move }) => {
+socket.on("game:move", ({ roomId, move }: { roomId: string; move: unknown }) => {
   const room = rooms.get(roomId);
   if (!room || !room.isActive) return;
+
+  if (!room.players.includes(playerId)) return;
+  if (!isMove(move)) return;
+
+  // One move per round: without this a player can overwrite their choice
+  // right up to the timer.
+  if (room.moves[playerId]) return;
 
   room.moves[playerId] = move;
   rooms.set(roomId, room);
@@ -371,8 +443,11 @@ socket.on("game:move", ({ roomId, playerId, move }: { roomId: string; playerId: 
 
 
     socket.on("disconnect", () => {
-      const playerId = socket.data.playerId as string | undefined;
-      if (playerId) socketsByPlayer.delete(playerId);
+      // Only drop the mapping if this socket still owns it; a reconnect may
+      // already have replaced it with a newer socket for the same player.
+      if (socketsByPlayer.get(playerId) === socket.id) {
+        socketsByPlayer.delete(playerId);
+      }
       for (const [, queue] of waitingPlayersByStake) {
         const i = queue.findIndex((q) => q.playerId === playerId);
         if (i !== -1) {
@@ -443,16 +518,26 @@ if (m1 && m2) {
       saveMatch(room, winner).catch((err) =>
         console.error("Error guardando partida (timer both moves):", err)
       );
+      const loser = room.players.find((p) => p !== winner)!;
       try {
-  await settleMatch({
-  winnerWalletId: room.wallets[winner],
-  loserWalletId: room.wallets[room.players.find(p => p !== winner)!],
-  stake: room.stake,
-
-  });
-} catch (err) {
-  console.error("❌ Error settling match:", err);
-}
+        await settleMatch({
+          winnerWalletId: room.wallets[winner],
+          loserWalletId: room.wallets[loser],
+          stake: room.stake,
+        });
+      } catch (err) {
+        // Both stakes are already in escrow at this point, so a failure here
+        // strands real funds. Log every id needed to settle it by hand.
+        console.error("❌ Error settling match:", {
+          roomId,
+          stake: room.stake,
+          winner,
+          loser,
+          winnerWalletId: room.wallets[winner],
+          loserWalletId: room.wallets[loser],
+          err,
+        });
+      }
 
       return;
     }
@@ -506,16 +591,26 @@ if (m1 && m2) {
       saveMatch(room, winner).catch((err) =>
         console.error("Error guardando partida (timer):", err)
       );
+      const loser = room.players.find((p) => p !== winner)!;
       try {
-  await settleMatch({
-    winnerWalletId: winner,
-    loserWalletId: room.players.find(p => p !== winner)!,
-    stake: room.stake,
-
-  });
-} catch (err) {
-  console.error("❌ Error settling match (timeout):", err);
-}
+        await settleMatch({
+          winnerWalletId: room.wallets[winner],
+          loserWalletId: room.wallets[loser],
+          stake: room.stake,
+        });
+      } catch (err) {
+        // Both stakes are already in escrow at this point, so a failure here
+        // strands real funds. Log every id needed to settle it by hand.
+        console.error("❌ Error settling match (timeout):", {
+          roomId,
+          stake: room.stake,
+          winner,
+          loser,
+          winnerWalletId: room.wallets[winner],
+          loserWalletId: room.wallets[loser],
+          err,
+        });
+      }
 
       return;
     }

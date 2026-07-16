@@ -60,14 +60,13 @@ const GameLobby = () => {
 
     socket.emit("game:join", {
       roomId,
-      playerId: id,
       walletId,
     });
 
 
     sessionStorage.removeItem("pendingInviteJoin");
   }
-  socket.emit("game:register", { playerId: id });
+  socket.emit("game:register");
 
   api
     .get(`/leaderboard/user/${id}`)
@@ -214,7 +213,6 @@ socket.on("game:privateReady", ({ roomId, players }) => {
 }
 
   socket.emit("game:queue", {
-    playerId: id,
     walletId,
     stake: stakeToUse,
   });
@@ -225,7 +223,7 @@ socket.on("game:privateReady", ({ roomId, players }) => {
     setOpponentStats(null);
   setOpponentId(null);
   setOpponentName("Desconocido");
-    socket.emit("game:cancelQueue", { playerId: id });
+    socket.emit("game:cancelQueue");
   };
 
   const handleCreatePrivate = () => {
@@ -238,7 +236,6 @@ socket.on("game:privateReady", ({ roomId, players }) => {
     setRoomId(newRoomId);
     socket.emit("game:create", {
   roomId: newRoomId,
-  playerId: id,
   stake: betAmount!,
   walletId,
 });
@@ -252,7 +249,6 @@ socket.on("game:privateReady", ({ roomId, players }) => {
 
   socket.emit("game:cancelPrivate", {
     roomId: waitingRoomId,
-    playerId: id,
   });
 
   setWaitingPrivate(false);
@@ -268,7 +264,6 @@ socket.on("game:privateReady", ({ roomId, players }) => {
     setRoomId(joinCode);
     socket.emit("game:join", {
   roomId: joinCode,
-  playerId: id,
   walletId,
 });
 
