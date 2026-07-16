@@ -95,7 +95,7 @@ export async function sendVerificationEmail(
                   font-size:13px;
                   color:#6b7280;
                 ">
-                  This code expires in <strong>10 minutes</strong>.
+                  This code expires in <strong>15 minutes</strong>.
                 </p>
 
                 <!-- Security -->

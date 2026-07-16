@@ -1,5 +1,6 @@
 import express from "express";
 import bs58 from "bs58";
+import crypto from "crypto";
 import nacl from "tweetnacl";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
@@ -183,7 +184,8 @@ router.post("/complete", async (req, res) => {
     const bcrypt = await import("bcrypt");
     const hashedPassword = await bcrypt.default.hash(password, 10);
 
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    // crypto.randomInt, not Math.random: this code gates account access.
+    const verificationCode = crypto.randomInt(100000, 1000000).toString();
 
     const user = await User.create({
       username,
