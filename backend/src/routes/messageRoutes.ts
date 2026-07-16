@@ -1,11 +1,27 @@
-import express from "express";
+import express, { Response } from "express";
+import { Types } from "mongoose";
 import { Message } from "../models/message";
-import { User } from "../models/user"; 
+import { AuthRequest, verifyToken } from "../middleware/authMiddleware";
 
 const router = express.Router();
 
-router.get("/:user1/:user2", async (req, res) => {
+router.use(verifyToken);
+
+/**
+ * Conversation history between the authenticated user and one other user.
+ * The caller may only read a conversation they take part in.
+ */
+router.get("/:user1/:user2", async (req: AuthRequest, res: Response) => {
   const { user1, user2 } = req.params;
+  const requesterId = req.user!._id;
+
+  if (!Types.ObjectId.isValid(user1) || !Types.ObjectId.isValid(user2)) {
+    return res.status(400).json({ message: "Invalid user id" });
+  }
+
+  if (requesterId !== user1 && requesterId !== user2) {
+    return res.status(403).json({ message: "Forbidden" });
+  }
 
   try {
     const messages = await Message.find({
@@ -21,35 +37,6 @@ router.get("/:user1/:user2", async (req, res) => {
   } catch (err) {
     console.error("❌ Error al obtener mensajes:", err);
     res.status(500).json({ message: "Error al obtener mensajes" });
-  }
-});
-
-
-router.post("/", async (req, res) => {
-  const { from, to, message } = req.body;
-
-  try {
-    const [sender, receiver] = await Promise.all([
-      User.findOne({ username: from }),
-      User.findOne({ username: to }),
-    ]);
-
-    if (!sender || !receiver) {
-      return res.status(404).json({ message: "Usuarios no encontrados" });
-    }
-
-    const newMessage = new Message({
-      from: sender._id,
-      to: receiver._id,
-      message,
-    });
-
-    await newMessage.save();
-
-    res.status(201).json(newMessage);
-  } catch (err) {
-    console.error("❌ Error al guardar mensaje:", err);
-    res.status(500).json({ message: "Error al guardar mensaje" });
   }
 });
 
