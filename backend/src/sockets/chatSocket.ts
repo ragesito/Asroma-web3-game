@@ -1,40 +1,49 @@
 // backend/sockets/chatSocket.ts
 import { Server } from "socket.io";
+import { Types } from "mongoose";
 import { Message } from "../models/message";
 import { User } from "../models/user";
 
+const MAX_MESSAGE_LENGTH = 2000;
+
 export const setupChatSocket = (io: Server) => {
-  const connectedUsers = new Map<string, string>(); 
+  const connectedUsers = new Map<string, string>();
 
   io.on("connection", (socket) => {
-    console.log("💬 Nuevo socket conectado:", socket.id);
+    // socketAuth (io.use) guarantees this is set and verified. Never reassign
+    // it from an event payload.
+    const userId: string = socket.data.userId;
+    console.log("💬 Nuevo socket conectado:", socket.id, userId);
 
-    socket.on("registerUser", (userId: string) => {
-      if (!userId) return;
+    connectedUsers.set(userId, socket.id);
+
+    socket.on("registerUser", () => {
+      // Identity comes from the handshake; this only refreshes the socket id
+      // after a reconnect.
       connectedUsers.set(userId, socket.id);
-      socket.data.userId = userId;
-      console.log(`✅ Usuario ${userId} registrado en el chat (${socket.id})`);
     });
 
-    socket.on("heartbeat", (userId: string) => {
-      if (connectedUsers.has(userId)) {
-        connectedUsers.set(userId, socket.id);
-      }
+    socket.on("heartbeat", () => {
+      connectedUsers.set(userId, socket.id);
     });
 
-socket.on("private:message", async ({ from, to, text }) => {
-  if (!from || !to || !text) return;
-  console.log(`💌 ${from} → ${to}: ${text}`);
+socket.on("private:message", async ({ to, text }) => {
+  const from = userId;
+  if (!to || typeof text !== "string") return;
+
+  const message = text.trim();
+  if (!message || message.length > MAX_MESSAGE_LENGTH) return;
+  if (!Types.ObjectId.isValid(to)) return;
 
   try {
-    const newMsg = new Message({ from, to, message: text });
+    const newMsg = new Message({ from, to, message });
     await newMsg.save();
 
     const sender = await User.findById(from).select("username avatar");
     const payload = {
       from,
       to,
-      text,
+      text: message,
       sender: sender
         ? {
             username: sender.username,
@@ -55,8 +64,9 @@ socket.on("private:message", async ({ from, to, text }) => {
 });
 
     socket.on("disconnect", () => {
-      const userId = socket.data.userId;
-      if (userId) {
+      // Only drop the mapping if this socket still owns it; a reconnect may
+      // already have replaced it with a newer socket for the same user.
+      if (connectedUsers.get(userId) === socket.id) {
         connectedUsers.delete(userId);
         console.log(`🔴 Usuario ${userId} desconectado del chat`);
       }
