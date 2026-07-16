@@ -23,7 +23,6 @@ import leaderboardUserRoutes from "./routes/leaderboardUser";
 import { startSeasonWatcher } from "./utils/seasonManager";
 import seasonRoutes from "./routes/seasonRoutes";
 import walletRoutes from "./routes/walletRoutes";
-import balanceRoutes from "./routes/balanceRoutes";
 import phantomAuthRoutes from "./routes/phantomAuthRoutes";
 connectDB();
 
@@ -67,10 +66,8 @@ app.use("/api/leaderboard/user", leaderboardUserRoutes);
 app.use("/api/public", publicUserRoutes);
 app.use("/api/seasons", seasonRoutes);
 app.use("/api/wallets", walletRoutes);
-app.use("/wallets", balanceRoutes);
 app.use("/api/auth/phantom", phantomAuthRoutes);
 app.use("/uploads", (req, res, next) => {res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");next();}, express.static(path.join(process.cwd(), "uploads")));
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 // Sockets (chat)
 setupChatSocket(io);
 setupFriendSocket(io);
