@@ -6,7 +6,7 @@ import { User } from "../models/user";
 import { Wallet } from "../models/wallet";
 import { Match } from "../models/match";
 import { Season } from "../models/season";
-import { lockFundsForMatch } from "../services/gameFundsService";
+import { lockFundsForBothPlayers } from "../services/gameFundsService";
 import { settleMatch } from "../services/gamePayoutService";
 
 interface PlayerData {
@@ -57,9 +57,9 @@ for (const stake of ALLOWED_STAKES) {
   const socketsByPlayer = new Map<string, string>();
 
   /**
-   * A wallet id from the client is only a claim. lockFundsForMatch decrypts
-   * whichever user's key the wallet belongs to, so without this check a player
-   * could stake someone else's wallet.
+   * A wallet id from the client is only a claim. Rejecting it here fails the
+   * player fast with a clear error; lockFundsForBothPlayers re-checks
+   * ownership before it decrypts anything, and that check is the real gate.
    */
   const ownsWallet = async (userId: string, walletId: string) => {
     if (!walletId || !Types.ObjectId.isValid(walletId)) return false;
@@ -189,8 +189,11 @@ for (const stake of ALLOWED_STAKES) {
       try {
         const [p1, p2] = room.players;
 
-        await lockFundsForMatch(room.wallets[p1], room.stake);
-        await lockFundsForMatch(room.wallets[p2], room.stake);
+        await lockFundsForBothPlayers(
+          { ownerId: p1, walletId: room.wallets[p1] },
+          { ownerId: p2, walletId: room.wallets[p2] },
+          room.stake
+        );
       } catch (err) {
         console.error("❌ Error locking funds (private match):", err);
 
@@ -335,11 +338,14 @@ for (const stake of ALLOWED_STAKES) {
       const s2Id = socketsByPlayer.get(p2);
 
       try {
-        await lockFundsForMatch(w1, stake);
-        await lockFundsForMatch(w2, stake);
+        await lockFundsForBothPlayers(
+          { ownerId: p1, walletId: w1 },
+          { ownerId: p2, walletId: w2 },
+          stake
+        );
       } catch (err) {
         console.error("❌ Error locking funds:", err);
-        
+
         if (s1Id) io.to(s1Id).emit("game:error", { message: "Insufficient funds" });
         if (s2Id) io.to(s2Id).emit("game:error", { message: "Insufficient funds" });
 
