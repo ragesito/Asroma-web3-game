@@ -6,6 +6,7 @@ import "./cron/cleanupUnverifiedUsers";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { Server } from "socket.io";
+import { socketAuth } from "./middleware/socketAuth";
 import { connectDB } from "./config/db";
 import { setupChatSocket } from "./sockets/chatSocket";
 import authRoutes from "./routes/authRoutes";
@@ -40,6 +41,9 @@ const io = new Server(server, {
     credentials: true,
   },
 });
+
+// Every socket must present a valid JWT before any handler can run.
+io.use(socketAuth);
 
 app.set("io", io);
 app.use(express.json());
