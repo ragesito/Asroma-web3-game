@@ -2,7 +2,7 @@
 
 import InvitePopup from "./invitePopup";
 import { socket } from "@/app/lib/socket";
-import { useUserStore } from "@/app/store/userStore";
+import { useSelectedWalletStore } from "@/app/store/walletStore";
 import { useRouter } from "next/navigation";
 
 interface GlobalInvitePopupProps {
@@ -18,7 +18,7 @@ export default function GlobalInvitePopup({
   roomId,
   onClose,
 }: GlobalInvitePopupProps) {
-  const { id } = useUserStore();
+  const { walletId } = useSelectedWalletStore();
   const router = useRouter();
 
   const handleAccept = () => {
@@ -30,7 +30,9 @@ export default function GlobalInvitePopup({
     if (window.location.pathname !== "/games") {
       router.push("/games");
     } else {
-      socket.emit("game:join", { roomId, playerId: id });
+      // walletId was missing here, so this join always failed with
+      // WALLET_NOT_FOUND while the same join from the lobby worked.
+      socket.emit("game:join", { roomId, walletId });
     }
 
     onClose();

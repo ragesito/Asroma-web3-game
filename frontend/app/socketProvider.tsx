@@ -21,7 +21,7 @@ export default function SocketProvider({ children }: { children: React.ReactNode
   useEffect(() => {
     if (!id) return;
 
-    socket.emit("game:register", { playerId: id });
+    socket.emit("game:register");
 
     socket.on("friend:inviteNotification", (data) => {
       if (!inviteEnabled) return;

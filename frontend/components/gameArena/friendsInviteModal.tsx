@@ -67,7 +67,6 @@ export default function FriendsInviteModal({
                   onClick={() => {
                     socket.emit("friend:inviteToRoom", {
                       roomId,
-                      fromUserId: id,
                       toUserId: friend._id,
                     });
                     onClose();
