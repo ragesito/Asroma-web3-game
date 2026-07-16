@@ -443,16 +443,26 @@ if (m1 && m2) {
       saveMatch(room, winner).catch((err) =>
         console.error("Error guardando partida (timer both moves):", err)
       );
+      const loser = room.players.find((p) => p !== winner)!;
       try {
-  await settleMatch({
-  winnerWalletId: room.wallets[winner],
-  loserWalletId: room.wallets[room.players.find(p => p !== winner)!],
-  stake: room.stake,
-
-  });
-} catch (err) {
-  console.error("❌ Error settling match:", err);
-}
+        await settleMatch({
+          winnerWalletId: room.wallets[winner],
+          loserWalletId: room.wallets[loser],
+          stake: room.stake,
+        });
+      } catch (err) {
+        // Both stakes are already in escrow at this point, so a failure here
+        // strands real funds. Log every id needed to settle it by hand.
+        console.error("❌ Error settling match:", {
+          roomId,
+          stake: room.stake,
+          winner,
+          loser,
+          winnerWalletId: room.wallets[winner],
+          loserWalletId: room.wallets[loser],
+          err,
+        });
+      }
 
       return;
     }
@@ -506,16 +516,26 @@ if (m1 && m2) {
       saveMatch(room, winner).catch((err) =>
         console.error("Error guardando partida (timer):", err)
       );
+      const loser = room.players.find((p) => p !== winner)!;
       try {
-  await settleMatch({
-    winnerWalletId: winner,
-    loserWalletId: room.players.find(p => p !== winner)!,
-    stake: room.stake,
-
-  });
-} catch (err) {
-  console.error("❌ Error settling match (timeout):", err);
-}
+        await settleMatch({
+          winnerWalletId: room.wallets[winner],
+          loserWalletId: room.wallets[loser],
+          stake: room.stake,
+        });
+      } catch (err) {
+        // Both stakes are already in escrow at this point, so a failure here
+        // strands real funds. Log every id needed to settle it by hand.
+        console.error("❌ Error settling match (timeout):", {
+          roomId,
+          stake: room.stake,
+          winner,
+          loser,
+          winnerWalletId: room.wallets[winner],
+          loserWalletId: room.wallets[loser],
+          err,
+        });
+      }
 
       return;
     }
