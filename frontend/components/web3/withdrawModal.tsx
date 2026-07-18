@@ -2,11 +2,29 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { PublicKey } from "@solana/web3.js";
 import SolanaIcon from "@/components/solanaIcon";
 import { useSelectedWalletStore } from "@/app/store/walletStore";
 import api from "@/app/lib/api";
 import { useTranslation } from "react-i18next";
 import ModalPortal from "../modalPortal";
+import Toast from "@/components/toast";
+import ToastPortal from "../toastPortal";
+
+/**
+ * A withdrawal is irreversible, so the address must be a real Solana public
+ * key, not just "long enough". new PublicKey() throws on anything that isn't a
+ * valid base58 32-byte key, which rejects typos and truncated pastes that the
+ * old length > 30 check let through.
+ */
+function isValidSolanaAddress(value: string): boolean {
+  try {
+    new PublicKey(value.trim());
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 interface WithdrawModalProps {
   open: boolean;
@@ -22,9 +40,16 @@ export default function WithdrawModal({ open, onClose }: WithdrawModalProps) {
   const [amount, setAmount] = useState("");
   const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState<{
+    message: string;
+    type?: "success" | "error" | "info";
+  } | null>(null);
   const parsedAmount = Number(amount);
   const isValidAmount = parsedAmount > 0 && parsedAmount <= sol;
-  const isValidAddress = address.length > 30; // validación simple v1
+  const isValidAddress = isValidSolanaAddress(address);
+  // Only flag the address as wrong once the user has typed something, so the
+  // field isn't red on an empty form.
+  const showAddressError = address.trim().length > 0 && !isValidAddress;
   const canSubmit = isValidAmount && isValidAddress && !loading;
   const { t } = useTranslation();
 
@@ -34,6 +59,7 @@ export default function WithdrawModal({ open, onClose }: WithdrawModalProps) {
   setAmount("");
   setAddress("");
   setLoading(false);
+  setToast(null);
 };
   useEffect(() => {
   if (!open) {
@@ -127,8 +153,17 @@ export default function WithdrawModal({ open, onClose }: WithdrawModalProps) {
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   placeholder={t("solana_public_address")}
-                  className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none"
+                  className={`w-full bg-black/50 border rounded-lg px-3 py-2 text-sm outline-none transition ${
+                    showAddressError
+                      ? "border-red-500/70"
+                      : "border-white/10"
+                  }`}
                 />
+                {showAddressError && (
+                  <p className="text-xs text-red-400 mt-1">
+                    {t("invalid_solana_address")}
+                  </p>
+                )}
               </div>
 
               <p className="text-xs text-gray-500 text-center mb-4">
@@ -156,7 +191,11 @@ export default function WithdrawModal({ open, onClose }: WithdrawModalProps) {
                     setTxSignature(res.data.signature);
                     setStep("success");
                   } catch (err: any) {
-                    alert(err.response?.data?.message || t("withdraw_failed"));
+                    setToast({
+                      message:
+                        err.response?.data?.message || t("withdraw_failed"),
+                      type: "error",
+                    });
                   } finally {
                     setLoading(false);
                   }
@@ -226,6 +265,16 @@ export default function WithdrawModal({ open, onClose }: WithdrawModalProps) {
       </motion.div>
     )}
   </AnimatePresence>
+
+  {toast && (
+    <ToastPortal>
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast(null)}
+      />
+    </ToastPortal>
+  )}
   </ModalPortal>
 );
 }
