@@ -25,7 +25,6 @@ export default function ClientRoot({ children }: { children: React.ReactNode }) 
 
     return () => {
   clearInterval(interval);
-  console.log("🧹 Limpieza de ClientRoot (sin desconectar socket)");
 };
   }, [id, token]); 
 

@@ -19,7 +19,6 @@ export default function FriendRequestProvider({ children }: { children: React.Re
   const [request, setRequest] = useState<any>(null);
 
   useEffect(() => {
-    console.log("🔗 FriendRequestProvider montado. ID del user:", id);
     if (!id) return;
 
     socket.on("friendRequest:new", (data) => {
