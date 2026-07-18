@@ -332,7 +332,7 @@ socket.on("friend:inviteNotification", (data) => {
         type: "error",
       });
     } else {
-      alert(`❌ ${data.message}`);
+      setToast({ message: data.message, type: "error" });
     }
   } catch (error) {
     console.error("Error al rechazar solicitud:", error);

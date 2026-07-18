@@ -2,20 +2,14 @@
 
 import TransitionPage from "@/components/transition-page";
 import Header from "@/components/header";
-import { useUserStore } from "@/app/store/userStore"; 
-import { useEffect } from "react";
 import { useState } from "react";
 import LoginModal from "@/components/LoginModal";
 import FriendList from "@/components/friends/friendList";
 import Particles from "@/components/spaceParticles";
 
 const FriendsPage = () => {
-  const { token } = useUserStore();
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
-  useEffect(() => {
-    console.log("Token detectado:", token);
-  }, [token]);
 
   return (
     <>

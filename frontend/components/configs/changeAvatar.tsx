@@ -27,7 +27,7 @@ export default function ChangeAvatar() {
   
   const handleUpload = async () => {
   if (!file) {
-    alert("Please select a file first!");
+    setToast({ message: t("select_file_first"), type: "error" });
     return;
   }
 

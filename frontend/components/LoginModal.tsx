@@ -34,6 +34,18 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess,  onNeedEma
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
 
+ // Submit on Enter from any field — the form is built from onClick buttons,
+ // so without this the universal email/password/Enter flow does nothing.
+ const onFieldKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+   if (e.key !== "Enter" || loading) return;
+   e.preventDefault();
+   if (isRegister) {
+     handleRegister();
+   } else {
+     handleLogin();
+   }
+ };
+
  const handleLogin = async () => {
   if (!email || !password) {
     setError("All fields are required.");
@@ -191,6 +203,7 @@ const handlePhantomAuth = async () => {
               className="w-full mb-2 p-2 rounded bg-white/10"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              onKeyDown={onFieldKeyDown}
             />
           )}
 
@@ -200,6 +213,7 @@ const handlePhantomAuth = async () => {
             className="w-full mb-2 p-2 rounded bg-white/10"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            onKeyDown={onFieldKeyDown}
           />
           <input
             type="password"
@@ -207,6 +221,7 @@ const handlePhantomAuth = async () => {
             className="w-full mb-4 p-2 rounded bg-white/10"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={onFieldKeyDown}
           />
 
           {error && <p className="text-red-400 text-sm mb-3 text-center">{error}</p>}
