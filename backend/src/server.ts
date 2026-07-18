@@ -6,6 +6,8 @@ import "./cron/cleanupUnverifiedUsers";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { Server } from "socket.io";
+import multer from "multer";
+import { ZodError } from "zod";
 import { socketAuth } from "./middleware/socketAuth";
 import { connectDB } from "./config/db";
 import { setupChatSocket } from "./sockets/chatSocket";
@@ -77,8 +79,24 @@ setupChatSocket(io);
 setupFriendSocket(io);
 setupGameSocket(io);
 
-// Error handler
+// Error handler. Maps the common "client sent something invalid" errors to
+// 4xx; everything else is a real 500.
 app.use((err: any, _req: any, res: any, _next: any) => {
+  // Invalid request body caught by a Zod schema.
+  if (err instanceof ZodError) {
+    return res.status(400).json({ message: "Invalid request" });
+  }
+
+  // Multer rejections: file too large, wrong mimetype, etc.
+  if (err instanceof multer.MulterError || err?.name === "MulterError") {
+    return res.status(400).json({ message: err.message });
+  }
+
+  // Malformed ObjectId / other BSON cast errors from a bad URL param.
+  if (err?.name === "BSONError" || err?.name === "CastError") {
+    return res.status(400).json({ message: "Invalid identifier" });
+  }
+
   logger.error(err);
   res.status(500).json({ message: "Internal server error" });
 });

@@ -174,8 +174,11 @@ try {
  } catch (err: any) {
   console.error("❌ REGISTER ERROR FULL:", err);
 
-  if (err.errors) {
-    return res.status(400).json({ message: "Datos inválidos", details: err.errors });
+  // instanceof, not err.errors: this project is on Zod 4, where the issue
+  // list moved from .errors to .issues, so the old check silently missed
+  // and returned 500 on invalid input.
+  if (err instanceof z.ZodError) {
+    return res.status(400).json({ message: "Datos inválidos", details: err.issues });
   }
 
   res.status(500).json({ message: "Internal server error" });
@@ -242,8 +245,8 @@ router.post("/verify-email", async (req, res) => {
       },
     });
   } catch (err: any) {
-    if (err.errors) {
-      return res.status(400).json({ message: "Datos inválidos", details: err.errors });
+    if (err instanceof z.ZodError) {
+      return res.status(400).json({ message: "Datos inválidos", details: err.issues });
     }
     logger.error("❌ Error en /verify-email:", err);
     res.status(500).json({ message: "Internal server error" });
@@ -285,6 +288,10 @@ router.post("/resend-verification", async (req, res) => {
 
     res.status(200).json({ message: "New code sent" });
   } catch (err: unknown) {
+  if (err instanceof z.ZodError) {
+    return res.status(400).json({ message: "Invalid request" });
+  }
+
   const message =
     err instanceof Error ? err.message : JSON.stringify(err);
 
@@ -336,10 +343,14 @@ router.post("/request-password-reset", async (req, res) => {
 
     res.status(200).json(genericResponse);
   } catch (err) {
+  if (err instanceof z.ZodError) {
+    return res.status(400).json({ message: "Invalid request" });
+  }
+
   const message =
     err instanceof Error ? err.message : JSON.stringify(err);
 
-  logger.error(`❌ reset-password: ${message}`);
+  logger.error(`❌ request-password-reset: ${message}`);
   res.status(500).json({ message: "Password reset failed" });
 }
 
@@ -427,6 +438,10 @@ router.post("/reset-password", async (req, res) => {
 
     res.status(200).json({ message: "Password updated" });
   } catch (err) {
+  if (err instanceof z.ZodError) {
+    return res.status(400).json({ message: "Invalid request" });
+  }
+
   const message =
     err instanceof Error ? err.message : JSON.stringify(err);
 
@@ -511,8 +526,8 @@ res.status(200).json({
 
     logger.info(`🔑 Login correcto para usuario: ${user.username}`);
   } catch (err: any) {
-    if (err.errors) {
-      return res.status(400).json({ message: "Datos inválidos", details: err.errors });
+    if (err instanceof z.ZodError) {
+      return res.status(400).json({ message: "Datos inválidos", details: err.issues });
     }
     logger.error("❌ Error en /login:", err);
     res.status(500).json({ message: "Internal error server" });
@@ -576,6 +591,9 @@ router.post("/verify-login-otp", async (req, res) => {
       avatar: user.avatar || "/uploads/default-avatar.jpg",
     });
   } catch (err) {
+    if (err instanceof z.ZodError) {
+      return res.status(400).json({ message: "Invalid request" });
+    }
     res.status(500).json({ message: "OTP login failed" });
   }
 });
