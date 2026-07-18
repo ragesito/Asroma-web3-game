@@ -1,15 +1,15 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import TransitionPage from "@/components/transition-page";
 import Particles from "@/components/spaceParticles";
-import PnlChart from "@/components/PNL/pnlChart";
-import BalanceCard from "@/components/PNL/balanceCard";
-import PerformanceCard from "@/components/PNL/performanceCard";
+
 export default function PnlPage() {
+  const { t } = useTranslation();
+
   return (
     <>
       <TransitionPage />
-  
 
       <div
         className="min-h-[100vh] bg-cover bg-center px-6 py-16 text-white"
@@ -35,21 +35,25 @@ export default function PnlPage() {
           />
         </div>
 
-        <div className="relative max-w-7xl  mx-auto mt-20 space-y-6">
-          {/* CHART */}
-          
-            <div className="max-w-7xl mx-auto space-y-6">
-
-        {/* CHART */}
-        <PnlChart />
-
-        {/* BOTTOM GRID */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <BalanceCard />
-          <PerformanceCard />
-        </div>
-
-      </div>
+        <div className="relative max-w-7xl mx-auto mt-20">
+          {/*
+            The PNL cards and chart were rendering hardcoded placeholder
+            figures (fake balance, fake win/loss, "chart placeholder"). Showing
+            invented currency numbers on a real-money app is worse than showing
+            nothing, so the page is gated behind a clear Coming Soon state until
+            it is wired to real data. The BalanceCard / PerformanceCard /
+            PnlChart components are kept in the repo for that work.
+          */}
+          <div className="mx-auto flex min-h-[50vh] max-w-2xl flex-col items-center justify-center gap-4 rounded-2xl border border-white/10 bg-black/40 px-8 py-16 text-center backdrop-blur">
+            <span className="text-5xl">📊</span>
+            <h1 className="text-3xl font-bold tracking-wide">{t("pnl")}</h1>
+            <span className="rounded-full bg-orange-500/20 px-4 py-1 text-sm font-semibold uppercase tracking-widest text-orange-400">
+              {t("coming_soon")}
+            </span>
+            <p className="max-w-md text-white/60">
+              {t("pnl_coming_soon_desc")}
+            </p>
+          </div>
         </div>
       </div>
     </>

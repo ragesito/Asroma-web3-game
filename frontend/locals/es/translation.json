@@ -121,6 +121,7 @@
 "create_room": "CREAR SALA",
 "join_room": "UNIRSE A SALA",
 "coming_soon": "PRÓXIMAMENTE",
+"pnl_coming_soon_desc": "El seguimiento detallado de ganancias y pérdidas está en camino.",
 "ranked_match_title": "Partida clasificatoria",
 "ranked_match_description": "Compite contra jugadores reales de todo el mundo para ver quién se lleva el premio; tú decides el monto",
 "create_match_title": "Crear partida",
