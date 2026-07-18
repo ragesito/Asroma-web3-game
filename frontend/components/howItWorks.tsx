@@ -1,10 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Wallet, Hand, Coins} from "lucide-react";
 import { useRouter } from "next/navigation";
 import ElectricBorder from "./electricBorder";
 import { useIsMobile } from "@/utils/useIsMobile";
+import { useUserStore } from "@/app/store/userStore";
+import LoginModal from "./LoginModal";
 
 const variants = {    
     hidden: { opacity: 0, x: -50 },
@@ -14,6 +17,8 @@ const variants = {
 
 export default function HowItWorks() {
   const isMobile = useIsMobile();
+  const id = useUserStore((s) => s.id);
+  const [showLogin, setShowLogin] = useState(false);
   const steps = [
     {
       icon: <Wallet size={45} className="text-orange-700" />,
@@ -111,14 +116,20 @@ const router = useRouter();
 
           <button
             onClick={() => {
-              console.log("connect wallet")
+              // Was a no-op console.log. Logged-in users go to their wallets;
+              // everyone else gets the login/connect modal (which has Phantom).
+              if (id) {
+                router.push("/wallets");
+              } else {
+                setShowLogin(true);
+              }
             }}
             className="
-              relative 
-              px-6 py-3 
-              rounded-xl 
+              relative
+              px-6 py-3
+              rounded-xl
               font-semibold text-white text-lg
-              bg-black/40 
+              bg-black/40
               border border-orange-400/50
               shadow-[0_0_17px_rgba(255,165,0,0.40)]
               backdrop-blur-md
@@ -133,9 +144,14 @@ const router = useRouter();
             Connect Wallet
           </button>
         </div>
-              
-</motion.div>  
 
+</motion.div>
+
+      <LoginModal
+        isOpen={showLogin}
+        onClose={() => setShowLogin(false)}
+        onLoginSuccess={() => setShowLogin(false)}
+      />
     </section>
   );
 }
